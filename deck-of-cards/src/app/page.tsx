@@ -1,34 +1,31 @@
 "use client";
 import { useEffect, useState } from "react";
+import { getNewDeck } from "@/app/utils/deckApi";
 
 export default function Home() {
   const [deckId, setDeckId] = useState([]);
 
   useEffect(() => {
-    async function getCards() {
-      const url =
-        "https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=1";
-
+    async function loadDeck() {
       try {
-        const response = await fetch(url);
-
-        if (!response.ok) {
-          throw new Error(`Response status: ${response.status}`);
-        }
-
-        const result = await response.json();
-        setDeckId(result.deck_id);
-      } catch (error) {
-        if (error instanceof Error) {
-          console.error(error.message);
-        } else {
-          console.error(String(error));
-        }
+        const data = await getNewDeck();
+        setDeckId(data.deck_id);
+        console.log("deckId: ", data.deck_id);
+      } catch (err) {
+        console.error(err);
       }
     }
 
-    getCards();
+    loadDeck();
   }, []);
 
-  return <>{deckId && <h2>Deck ready</h2>}</>;
+  return (
+    <>
+      <main className="p-6">
+        <h1 className="text-2xl font-bold">Deck of Cards</h1>
+        <p>Deck ID: {deckId ? deckId : "Loading..."}</p>
+        <button className="bg-amber-400">Draw Card</button>
+      </main>
+    </>
+  );
 }
