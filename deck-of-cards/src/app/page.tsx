@@ -6,10 +6,10 @@ import Image from "next/image";
 export default function Home() {
   const [deckId, setDeckId] = useState<string>("");
   const [cards, setCards] = useState<any[]>([]);
-
   const [valueMatches, setValueMatches] = useState<number>(0);
   const [suitMatches, setSuitMatches] = useState<number>(0);
   const [message, setMessage] = useState<string>("");
+  const [isFinished, setIsFinished] = useState(false);
 
   useEffect(() => {
     async function loadDeck() {
@@ -49,10 +49,12 @@ export default function Home() {
           }
         }
 
+        if (updatedCards.length === 52) {
+          setIsFinished(true);
+        }
+
         return updatedCards;
       });
-
-      console.log("drew card:", newCard);
     } catch (err) {
       console.error(err);
     }
@@ -101,16 +103,19 @@ export default function Home() {
             </div>
           </div>
 
-          <button
-            onClick={handleDraw}
-            className="bg-blue-400 text-white p-2 rounded-md border-2 border-blue-500"
-          >
-            Draw card
-          </button>
-          <div className="mt-10">
-            <p>Value matches: {valueMatches}</p>
-            <p>Suit matches: {suitMatches}</p>
-          </div>
+          {!isFinished ? (
+            <button
+              onClick={handleDraw}
+              className="bg-blue-400 text-white p-2 rounded-md border-2 border-blue-500"
+            >
+              Draw card
+            </button>
+          ) : (
+            <div className="mt-4 text-lg">
+              <p>Total value matches: {valueMatches}</p>
+              <p>Total suit matches: {suitMatches}</p>
+            </div>
+          )}
         </div>
       </main>
     </>
