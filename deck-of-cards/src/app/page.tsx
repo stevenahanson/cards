@@ -7,6 +7,10 @@ export default function Home() {
   const [deckId, setDeckId] = useState<string>("");
   const [cards, setCards] = useState<any[]>([]);
 
+  const [valueMatches, setValueMatches] = useState<number>(0);
+  const [suitMatches, setSuitMatches] = useState<number>(0);
+  const [message, setMessage] = useState<string>("");
+
   useEffect(() => {
     async function loadDeck() {
       try {
@@ -27,7 +31,27 @@ export default function Home() {
     try {
       const data = await drawCard(deckId);
       const newCard = data.cards[0];
-      setCards((prev) => [...prev, newCard]);
+
+      setCards((prev) => {
+        const updatedCards = [...prev, newCard];
+
+        if (updatedCards.length >= 2) {
+          const prevCard = updatedCards[updatedCards.length - 2];
+
+          if (newCard.value === prevCard.value) {
+            setValueMatches((count) => count + 1);
+            setMessage("SNAP VALUE!");
+          } else if (newCard.suit === prevCard.suit) {
+            setSuitMatches((count) => count + 1);
+            setMessage("SNAP SUIT!");
+          } else {
+            setMessage("");
+          }
+        }
+
+        return updatedCards;
+      });
+
       console.log("drew card:", newCard);
     } catch (err) {
       console.error(err);
@@ -42,7 +66,11 @@ export default function Home() {
         </div>
         <div className="flex flex-col items-center justify-center py-10">
           <div>
-            <h2 className="uppercase py-4">some text!</h2>
+            {message && (
+              <div className="py-4 text-lg font-bold text-red-500">
+                {message}
+              </div>
+            )}
           </div>
 
           {/* Cards */}
@@ -79,6 +107,10 @@ export default function Home() {
           >
             Draw card
           </button>
+          <div className="mt-10">
+            <p>Value matches: {valueMatches}</p>
+            <p>Suit matches: {suitMatches}</p>
+          </div>
         </div>
       </main>
     </>
