@@ -1,9 +1,11 @@
 "use client";
 import { useEffect, useState } from "react";
-import { getNewDeck } from "@/app/utils/deckApi";
+import { getNewDeck, drawCard } from "@/app/utils/deckApi";
+import Image from "next/image";
 
 export default function Home() {
-  const [deckId, setDeckId] = useState([]);
+  const [deckId, setDeckId] = useState<string>("");
+  const [cards, setCards] = useState<any[]>([]);
 
   useEffect(() => {
     async function loadDeck() {
@@ -19,12 +21,48 @@ export default function Home() {
     loadDeck();
   }, []);
 
+  const handleDraw = async () => {
+    if (!deckId) return;
+
+    try {
+      const data = await drawCard(deckId);
+      const newCard = data.cards[0];
+      setCards((prev) => [...prev, newCard]);
+      console.log("drew card:", newCard);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   return (
     <>
-      <main className="p-6">
-        <h1 className="text-2xl font-bold">Deck of Cards</h1>
-        <p>Deck ID: {deckId ? deckId : "Loading..."}</p>
-        <button className="bg-amber-400">Draw Card</button>
+      <main>
+        <div className="py-2 w-full h-full border-b-2 border-gray-300">
+          <h1 className="px-2 text-xl text-gray-500 uppercase">snap!</h1>
+        </div>
+        <div className="flex flex-col items-center justify-center py-10">
+          <div>
+            <h2 className="uppercase py-4">some text!</h2>
+          </div>
+          <div className="flex space-x-6 text-white">
+            {cards.length > 0 && (
+              <div className="py-10">
+                <Image
+                  src={cards[cards.length - 1].image}
+                  width={100}
+                  height={100}
+                  alt="Current card"
+                />
+              </div>
+            )}
+          </div>
+          <button
+            onClick={handleDraw}
+            className="bg-blue-400 text-white p-2 rounded-md border-2 border-blue-500"
+          >
+            Draw card
+          </button>
+        </div>
       </main>
     </>
   );
